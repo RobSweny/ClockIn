@@ -9,12 +9,17 @@ api = Api(app)
 
 today = datetime.today().strftime('%Y%m%d')
 now = datetime.now().strftime('%H:%M:%S')
-punchcards = {"00001": {"date": str(today), "clock-in": str("08:30:00"), "clock-out": str("17:00:01")},
-        "00002": {"date": str(today), "clock-in": str("08:30:00"), "clock-out": str("12:30:00")}}
+punchcards = {"00001": {"date": str(today), "clock-in": str("08:30:00"), "clock-out": str("17:00:01"), "holiday": False},
+        "00002": {"date": str(today), "clock-in": str("08:30:00"), "clock-out": str("12:30:00"), "holiday": True},
+        "00003": {"date": str(today), "clock-in": str("08:30:00"), "clock-out": str("12:30:00"), "holiday": False}}
 
 # Required fields
 # punchcard_get_args = reqparse.RequestParser()
 # punchcard_get_args.add_argument("punchcard", type=str, help="Employee ID is required", required=True)
+
+def TimeToSecondsConvert(t):
+    h, m, s = [int(i) for i in t.split(':')]
+    return 3600*h + 60*m + s
 
 # Retrieve all punchcards
 class PunchCardsAll(Resource):
@@ -58,17 +63,23 @@ class HoursWorked(Resource):
             res.append("User ID: " + each[0] + ", hours worked: " +  str(hours_worked))
         return res
 
-# Retrieve Hours work per worker
+# Retrieve list of users who worked less hours then they should
 class HoursBelowTime(Resource):
     def get(self):
         res = []
+        defined_hours = "08:00:00"
         for each in punchcards.items():
             date_time_clock_out = datetime.strptime(each[1]['clock-out'], '%H:%M:%S')
             date_time_clock_in = datetime.strptime(each[1]['clock-in'], '%H:%M:%S')
+            holiday = each[1]['holiday']
             hours_worked = date_time_clock_out - date_time_clock_in
-            if(hours_worked < "08:00:00"):
-                res.append("User ID: " + each[0] + ", hours worked: " +  str(hours_worked))
+            hours_worked_seconds = TimeToSecondsConvert(str(hours_worked))
+            defined_hours_seconds = TimeToSecondsConvert(str(defined_hours))
+            if(hours_worked_seconds < defined_hours_seconds and not holiday):
+                res.append("User ID: " + each[0] + ", Hours worked: " +  str(hours_worked) + ", Holiday: " + str(each[1]['holiday']))
         return res
+
+
 
 # Function to check how many employess clocked in today
 # Enter /PunchCardsDate/<string:date>" with date as parameter format (%Y%m%d)
@@ -93,6 +104,8 @@ api.add_resource(HoursBelowTime, "/HoursBelowTime")
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
 
 
 
