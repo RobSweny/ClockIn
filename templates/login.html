@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+        
+        <!-- Sweet alert - https://sweetalert2.github.io/#download -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+        <!-- https://getbootstrap.com/docs/4.4/getting-started/introduction/ -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    </head>
+    <body style="background-color:FloralWhite;">
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        <div class="container">
+            {% for message in get_flashed_messages() %}
+            <div class="alert alert-error" style="width: 350px; position: fixed; background-color: orange; margin-left: 10px; margin-top: 15%;">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong>Warning!</strong> {{ message }}.
+            </div>
+            {% endfor %}
+            <form id="form" method="POST" style="position: static; padding-top: 25%;" onsubmit="submitForm(); return false;">
+                <h3 style="margin:15px;">User Login</h3>
+                <div class="form-group">
+                    <input style="margin:15px;" id="username" type="text" class="form-control" placeholder="Username" name="username">
+                    <input style="margin:15px;" id="password" type="password" class="form-control" placeholder="Password" name="password">
+                </div>
+                <button id="submitButton" style="margin-left:15px;" type="submit" class="btn btn-primary">Login</button>
+            </form>
+        <div>
+
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+        <script type="text/javascript"> 
+            var uname = document.getElementById("username");
+            var pword = document.getElementById("password");
+            var submitBtn = document.getElementById("submitButton");
+        
+            function submitForm(){
+                var error = "";
+                if (uname.value == "" && pword.value == ""){
+                    Swal.fire('Please enter a username and password');
+                } else if (uname.value == ""){
+                    Swal.fire('Please enter a username');
+                } else if (pword.value == ""){
+                    Swal.fire('Please enter a password');
+                } else {
+                    document.getElementById("myForm").action = "http://localhost:5000/login";
+                }
+            }
+            uname.addEventListener('keypress', function(event) {
+                if (event.keyCode == 13) {
+                    document.getElementById('submitButton').click();
+                }
+            });
+
+            pword.addEventListener('keypress', function(event) {
+                if (event.keyCode == 13) {
+                    document.getElementById('submitButton').click();
+                }
+            });
+
+            submitBtn.addEventListener("click", function() {
+                submitForm();
+            });
+        </script> 
+    </body>
+</html>
