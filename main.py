@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, render_template, request, session, flash
+from flask import Flask, redirect, url_for, render_template, request, session, flash, g
 from flask_restful import Api, Resource, reqparse
 from datetime import datetime
 import json
@@ -10,6 +10,14 @@ users = []
 app = Flask(__name__)
 api = Api(app)
 app.secret_key = 'topsecretkeywritteninplaintext'
+
+@app.before_request
+def before_request():
+    g.user = None
+    if 'user_id' in session:
+        user = [x for x in users if x.id == session['user_id']][0]
+        g.user = user
+
 
 class User:
     def __init__(self, id, username, password, admin):
@@ -64,9 +72,10 @@ def login():
             flash('Invalid Credentials')
             return redirect(url_for('login'))
         if user and user.password == password:
-            #session['user_id'] == user.id
+            session["user_id"] = user.id
             # url_for = URL builder 
             flash('You have successfully logged in')
+            session.pop('_flashes', None)
             return redirect(url_for('profile'))
     
         flash('Invalid Credentials')
@@ -80,6 +89,9 @@ def home():
 
 @app.route('/profile')
 def profile():
+    if not g.user:
+        flash('Please to view your profile!')
+        return redirect(url_for('login'))
     return render_template("profile.html")
 
 # Retrieve all punchcards
