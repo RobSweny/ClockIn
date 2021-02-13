@@ -1,5 +1,8 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash, g
 from flask_restful import Api, Resource, reqparse
+from flask_cors import CORS
+from flask_principal import Principal
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import json
 from operator import itemgetter 
@@ -8,8 +11,11 @@ users = []
 
 # Create instance of a Flask application
 app = Flask(__name__)
-api = Api(app)
+app.config['SECRET_KEY'] = 'topsecretkeywritteninplaintext'
 app.secret_key = 'topsecretkeywritteninplaintext'
+principals = Principal(app)
+api = Api(app)
+cors = CORS(app, resources={r"/api/*": {"origins": "example.com"}})
 
 @app.before_request
 def before_request():
@@ -30,8 +36,8 @@ class User:
     def __repr__(self):
         return f'<User: {self.username}';
 
-users.append(User(id=1, username='Ana', password='password', admin='false'))
-users.append(User(id=2, username='Rob', password='password', admin='true'))
+users.append(User(id=1, username='Ana', password="password", admin=False))
+users.append(User(id=2, username='Rob', password="password", admin=True))
 
 
 
@@ -73,11 +79,13 @@ def login():
             return redirect(url_for('login'))
         if user and user.password == password:
             session["user_id"] = user.id
+            session["user_admin"] = user.admin
             # url_for = URL builder 
             flash('You have successfully logged in')
             session.pop('_flashes', None)
             return redirect(url_for('profile'))
-    
+
+                
         flash('Invalid Credentials')
         return redirect(url_for('login'))
 
@@ -115,48 +123,65 @@ class PunchCardsID(Resource):
 # Retrieve all clock in times
 class PunchCardsClockIn(Resource):
     def get(self):
-        res = []
-        for each in punchcards.items():
-            res.append(each[1]['clock-in'])
-        return res
+        if g.user.admin:
+            res = []
+            for each in punchcards.items():
+                res.append(each[1]['clock-in'])
+            return res
+        else:
+            flash('You need to be an administrator to view this')
+            return redirect(url_for('login'))
+        
 
 
 # Retrieve all clock out times
 class PunchCardsClockOut(Resource):
     def get(self):
-        res = []
-        for each in punchcards.items():
-            res.append(each[1]['clock-out'])
-        return res
+        if g.user.admin:
+            res = []
+            for each in punchcards.items():
+                res.append(each[1]['clock-out'])
+            return res
+        else:
+            flash('You need to be an administrator to view this')
+            return redirect(url_for('login'))
 
 
 # Retrieve Hours work per worker
 class HoursWorked(Resource):
     def get(self):
-        res = []
-        for each in punchcards.items():
-            date_time_clock_out = datetime.strptime(each[1]['clock-out'], '%H:%M:%S')
-            date_time_clock_in = datetime.strptime(each[1]['clock-in'], '%H:%M:%S')
-            hours_worked = date_time_clock_out - date_time_clock_in
-            res.append("User ID: " + each[0] + ", hours worked: " +  str(hours_worked))
-        return res
+        if g.user.admin:
+            res = []
+            for each in punchcards.items():
+                date_time_clock_out = datetime.strptime(each[1]['clock-out'], '%H:%M:%S')
+                date_time_clock_in = datetime.strptime(each[1]['clock-in'], '%H:%M:%S')
+                hours_worked = date_time_clock_out - date_time_clock_in
+                res.append("User ID: " + each[0] + ", hours worked: " +  str(hours_worked))
+            return res
+        else:
+            flash('You need to be an administrator to view this')
+            return redirect(url_for('login'))
 
 
 # Retrieve list of users who worked less hours then they should
 class HoursBelowTime(Resource):
     def get(self):
-        res = []
-        defined_hours = "08:00:00"
-        for each in punchcards.items():
-            date_time_clock_out = datetime.strptime(each[1]['clock-out'], '%H:%M:%S')
-            date_time_clock_in = datetime.strptime(each[1]['clock-in'], '%H:%M:%S')
-            holiday = each[1]['holiday']
-            hours_worked = date_time_clock_out - date_time_clock_in
-            hours_worked_seconds = TimeToSecondsConvert(str(hours_worked))
-            defined_hours_seconds = TimeToSecondsConvert(str(defined_hours))
-            if(hours_worked_seconds < defined_hours_seconds and not holiday):
-                res.append("User ID: " + each[0] + ", Hours worked: " +  str(hours_worked) + ", Holiday: " + str(each[1]['holiday']))
-        return res
+        if g.user.admin:
+            res = []
+            defined_hours = "08:00:00"
+            for each in punchcards.items():
+                date_time_clock_out = datetime.strptime(each[1]['clock-out'], '%H:%M:%S')
+                date_time_clock_in = datetime.strptime(each[1]['clock-in'], '%H:%M:%S')
+                holiday = each[1]['holiday']
+                hours_worked = date_time_clock_out - date_time_clock_in
+                hours_worked_seconds = TimeToSecondsConvert(str(hours_worked))
+                defined_hours_seconds = TimeToSecondsConvert(str(defined_hours))
+                if(hours_worked_seconds < defined_hours_seconds and not holiday):
+                    res.append("User ID: " + each[0] + ", Hours worked: " +  str(hours_worked) + ", Holiday: " + str(each[1]['holiday']))
+            return res
+        else:
+            flash('You need to be an administrator to view this')
+            return redirect(url_for('login'))
  
 
 
@@ -164,11 +189,15 @@ class HoursBelowTime(Resource):
 # Enter /PunchCardsDate/<string:date>" with date as parameter format (%Y%m%d)
 class PunchCardsDate(Resource):
     def get(self, date):
-        counter = 0
-        for each in punchcards.items():
-            if (each[1]['date'] == date):
-                counter += 1
-        return counter
+        if g.user.admin:
+            counter = 0
+            for each in punchcards.items():
+                if (each[1]['date'] == date):
+                    counter += 1
+            return counter
+        else:
+            flash('You need to be an administrator to view this')
+            return redirect(url_for('login'))
 
 
 # The add_resource function registers the routes with the framework using the given endpoint.
