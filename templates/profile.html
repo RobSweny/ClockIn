@@ -16,8 +16,26 @@
         <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
-        <h2>{{g.user.username}}'s Profile</h2>
-        <p>You are signed in as {{g.user.usertype}}</p> 
-        <script src="" async defer></script>
+        
+        <div class="container" style="background-color:OldLace; border-radius:20px; margin: 20px; padding: 15px;">
+            <div class="small_container">
+                <h4 style="display:inline-block;">{{g.user.username}}'s Profile, Administrator: {{g.user.admin}}</h4>  
+                <button id="logOutButton" style="float:right; margin: 20px;" onclick="logout()" type="submit" class="btn btn-primary">Log out</button>
+            </div>
+
+            {% block content %}
+                {% if g.user.admin %}
+                    <button id="submitButton" style="display: flex; " type="submit" class="btn btn-primary">Add User</button>
+                {% endif %}
+            {% endblock %}
+        </div>
+        
+        
+        <script type="text/javascript"> 
+
+            function logout(){
+                window.location.href = 'login';
+            }
+        </script>
     </body>
 </html>
