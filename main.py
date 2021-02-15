@@ -104,12 +104,22 @@ def hometest():
     result = firebase.get('/users', None)
     return str(result)
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 def profile():
     if not g.user:
         flash('Please to view your profile!')
         return redirect(url_for('login'))
     return render_template("profile.html")
+
+    if request.method == 'POST':
+        userdata = dict(request.form)
+        fname = userdata["fullname"][0]
+        pword = userdata["password"][0]
+        userdata = {"fullname": fname, "password": pword}
+        firebase.post("/users", userdata)
+        return "Thank you!"
+    else:
+        return "Sorry, there was an error."
 
 # Retrieve all punchcards
 class PunchCardsAll(Resource):
