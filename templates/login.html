@@ -35,7 +35,7 @@
                     <input style="margin:15px;" id="username" type="text" class="form-control" placeholder="Username" name="username">
                     <input style="margin:15px;" id="password" type="password" class="form-control" placeholder="Password" name="password">
                 </div>
-                <button id="submitButton" style="margin-left:15px;" type="submit" class="btn btn-primary">Login</button>
+                <button id="submitButton" onclick="submitForm();" style="margin-left:15px;" type="submit" class="btn btn-primary">Login</button>
             </form>
         <div>
 
@@ -48,34 +48,38 @@
             var uname = document.getElementById("username");
             var pword = document.getElementById("password");
             var submitBtn = document.getElementById("submitButton");
-        
+            var form = document.getElementById("form");
+            
             function submitForm(){
                 var error = "";
+                var triggered = false
                 if (uname.value == "" && pword.value == ""){
                     Swal.fire('Please enter a username and password');
+                    triggered = true
                 } else if (uname.value == ""){
                     Swal.fire('Please enter a username');
+                    triggered = true
                 } else if (pword.value == ""){
                     Swal.fire('Please enter a password');
-                } else {
+                    triggered = true
+                } 
+                
+                if (!triggered) {
                     document.getElementById("myForm").action = "http://localhost:5000/login";
                 }
             }
             uname.addEventListener('keypress', function(event) {
                 if (event.keyCode == 13) {
-                    document.getElementById('submitButton').click();
+                    form.submit();
                 }
             });
 
             pword.addEventListener('keypress', function(event) {
                 if (event.keyCode == 13) {
-                    document.getElementById('submitButton').click();
+                    form.submit();
                 }
             });
 
-            submitBtn.addEventListener("click", function() {
-                submitForm();
-            });
         </script> 
     </body>
 </html>

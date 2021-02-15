@@ -101,8 +101,23 @@ def home():
 
 @app.route('/')
 def hometest():
-    result = firebase.get('/users', None)
+    result = firebase.get('users/restaurants', None)
     return str(result)
+
+
+@app.route('/submit', methods=['GET', 'POST'])
+def submit():
+    if request.method == 'POST':
+        userdata = dict(request.form)
+        name = userdata["fullname"]
+        password = userdata["password"]
+        #new_data = {"fullname": name, "password": password, "clock-in": null, "clock-out": null, "date": datetime.today(), "holiday": null}
+        new_data = {"fullname": name, "password": password}
+        firebase.post("/users", new_data)
+        #flash('User succesfully written to database!')
+        return render_template("profile.html")
+    else:
+        return "Sorry, there was an error."
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
@@ -111,15 +126,6 @@ def profile():
         return redirect(url_for('login'))
     return render_template("profile.html")
 
-    if request.method == 'POST':
-        userdata = dict(request.form)
-        fname = userdata["fullname"][0]
-        pword = userdata["password"][0]
-        userdata = {"fullname": fname, "password": pword}
-        firebase.post("/users", userdata)
-        return "Thank you!"
-    else:
-        return "Sorry, there was an error."
 
 # Retrieve all punchcards
 class PunchCardsAll(Resource):
