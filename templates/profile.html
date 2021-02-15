@@ -11,27 +11,88 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="">
+
+        <!-- Sweet alert - https://sweetalert2.github.io/#download -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+        <!-- https://getbootstrap.com/docs/4.4/getting-started/introduction/ -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     </head>
-    <body style="background-color:DarkSeaGreen;">
+    <body style="background-color:DarkSeaGreen; margin:12px;">
         <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
         
-        <div class="container" style="background-color:OldLace; border-radius:20px; margin: 20px; padding: 15px;">
+        <div class="container" style="background-color:OldLace; border-radius:20px; margin: 12px; padding: 15px;">
             <div class="small_container">
                 <h4 style="display:inline-block;">{{g.user.username}}'s Profile, Administrator: {{g.user.admin}}</h4>  
-                <button id="logOutButton" style="float:right; margin: 20px;" onclick="logout()" type="submit" class="btn btn-primary">Log out</button>
+                <button id="logOutButton" style="float:right; margin: 12px;" onclick="logout()" type="submit" class="btn btn-primary">Log out</button>
             </div>
 
             {% block content %}
                 {% if g.user.admin %}
-                    <button id="submitButton" style="display: flex; " type="submit" class="btn btn-primary">Add User</button>
+                    <div style="display:relative;">
+                        <p>Administrative Tools</p>
+                        <button id="userManipulationBtn" onclick="userManipulationContainer()"  type="submit" class="btn btn-primary">Add/Remove User</button>
+                    </div>
+                    <div id="userManipulationContainer"class="userManipulation" style="background-color: LightSalmon; width: 240px; height: 250px; margin-top: 15px; border-radius: 15px; padding-top: 10px; display: none;">
+                        <p> </p>
+                        <input placeholder="UserID" id="userid" name="userid" maxlength="15" style="width: 200px; display:flex; padding: 8px; margin: 10px; border:0; border-radius: 10px;">
+                        <input placeholder="Full Name" id="fname" name="fullname" maxlength="15" style="width: 200px; display:flex; padding: 8px; margin: 10px; border:0; border-radius: 10px;">
+                        <input placeholder="Password" id="pword" name="password" maxlength="15" style="width: 200px; display:flex; padding: 8px; margin: 10px; border:0; border-radius: 10px;">
+                        <button id="addUserBtn" onclick="addUser()" style="width: 100px; height: 65px; margin-left: 10px; padding:8px; border:0; border-radius: 10px;" type="submit" class="btn btn-success">Add User</button>
+                        <button id="removeUserBtn" onclick="removeUser()" style="width: 100px; height: 65px; padding:8px; border:0; border-radius: 10px;" type="submit" class="btn btn-danger">Remove User</button>
+                    </div>
                 {% endif %}
             {% endblock %}
+
+
         </div>
         
         
         <script type="text/javascript"> 
+            var userManipContain = document.getElementById("userManipulationContainer");
+            var userid = document.getElementById("userid");
+            var fname = document.getElementById("fname");
+            var pword = document.getElementById("pword");
+            var submitBtn = document.getElementById("submitButton");
+
+            function addUser(){
+                submitForm()
+            
+            }
+
+            function removeUser(){
+                submitForm()
+
+            }
+
+            function submitForm(){
+                var error = "Please fill in fields: ";
+                if (userid.value == ""){
+                    error += "\nuser id"
+                }
+                if (fname.value == ""){
+                    error += "\nfull name"
+                }
+                if (pword.value == ""){
+                    error += "\npassword"
+                }
+                Swal.fire(error);
+                return false
+            }
+        
+            function userManipulationContainer(){
+                if(userManipContain.style.display == 'none'){
+                    userManipContain.style.display = 'block'    
+                } else {
+                    userManipContain.style.display = 'none'    
+                }
+
+
+
+            }
+
 
             function logout(){
                 window.location.href = 'login';

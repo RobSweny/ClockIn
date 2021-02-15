@@ -3,6 +3,7 @@ from flask_restful import Api, Resource, reqparse
 from flask_cors import CORS
 from flask_principal import Principal
 from werkzeug.security import generate_password_hash, check_password_hash
+from firebase import firebase
 from datetime import datetime
 import json
 from operator import itemgetter 
@@ -16,6 +17,9 @@ app.secret_key = 'topsecretkeywritteninplaintext'
 principals = Principal(app)
 api = Api(app)
 cors = CORS(app, resources={r"/api/*": {"origins": "example.com"}})
+
+firebase = firebase.FirebaseApplication('https://clockin-440c9-default-rtdb.europe-west1.firebasedatabase.app/', None)
+
 
 @app.before_request
 def before_request():
@@ -94,6 +98,11 @@ def login():
 @app.route('/home')
 def home():
     return render_template("index.html")
+
+@app.route('/')
+def hometest():
+    result = firebase.get('/users', None)
+    return str(result)
 
 @app.route('/profile')
 def profile():
