@@ -114,7 +114,10 @@ def submitAdd():
             userdata = dict(request.form)
             name = userdata["fullname"]
             password = userdata["password"]
-            new_data = {"fullname": name, "password": password, "clock-in": None, "clock-out": None, "date": datetime.today().strftime("%Y%m%d"), "holiday": None}
+            admin = userdata['dropdown']
+            admin = False if 1 else True
+            print(admin)
+            new_data = {"fullname": name, "password": password, "clock-in": None, "clock-out": None, "date": datetime.today().strftime("%Y%m%d"), "holiday": None, "admin": admin}
             firebase.post("/users", new_data)
             flash('Successfully added user to the database!')
             return redirect(url_for('profile'))
