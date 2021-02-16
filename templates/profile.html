@@ -22,7 +22,14 @@
         <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
-        
+
+        {% for message in get_flashed_messages() %}
+        <div class="alert alert-success" id="alert_box" role="alert" style="width: 500px; position: relative; background-color: orange; margin-left: 10px;">
+            <button type="button" onclick="alert_close();" class="close" data-dismiss="alert">&times;</button>
+            <strong>Success!</strong> {{ message }}.
+        </div>
+        {% endfor %}
+
         <div class="container" style="background-color:OldLace; border-radius:20px; margin: 12px; padding: 15px;">
             <div class="small_container">
                 <h4 style="display:inline-block;">{{g.user.username}}'s Profile, Administrator: {{g.user.admin}}</h4>  
@@ -31,7 +38,7 @@
 
             {% block content %}
                 {% if g.user.admin %}
-                    <div style="display:relative;">
+                    <div style="display:inline-block;">
                         <p>Administrative Tools</p>
                         <button id="userManipulationBtn" onclick="userManipulationContainer()"  type="submit" class="btn btn-primary">Add/Remove User</button>
                     </div>
@@ -40,8 +47,8 @@
                             <!--<input type="text" placeholder="UserID" id="userid" name="userid" maxlength="15" style="width: 200px; display:flex; padding: 8px; margin: 10px; border:0; border-radius: 10px;">-->
                             <input type="text" placeholder="Full Name" id="fname" name="fullname" maxlength="15" style="width: 200px; display:flex; padding: 8px; margin: 10px; border:0; border-radius: 10px;">
                             <input type="text" placeholder="Password" id="pword" name="password" maxlength="15" style="width: 200px; display:flex; padding: 8px; margin: 10px; border:0; border-radius: 10px;">
-                            <button type="submit" id="addUserBtn" onclick="submitForm('add'); return false" style="width: 100px; height: 65px; margin-left: 10px; padding:8px; border:0; border-radius: 10px;" class="btn btn-success">Add User</button>
-                            <button type="submit" id="removeUserBtn" onclick="submitForm('remove'); return false" style="width: 100px; height: 65px; padding:8px; border:0; border-radius: 10px;" class="btn btn-danger">Remove User</button>
+                            <button type="submit" id="addUserBtn" onclick="submitForm('add'); return false;" style="width: 100px; height: 65px; margin-left: 10px; padding:8px; border:0; border-radius: 10px;" class="btn btn-success">Add User</button>
+                            <button type="submit" id="removeUserBtn" onclick="submitForm('remove'); return false;" style="width: 100px; height: 65px; padding:8px; border:0; border-radius: 10px;" class="btn btn-danger">Remove User</button>
                         </div>
                     </form>
                 {% endif %}
@@ -58,6 +65,7 @@
             var pword = document.getElementById("pword");
             var submitBtn = document.getElementById("submitButton");
             var addBtn = document.getElementById('addUserBtn');
+            var form  = document.getElementById('form');
 
             // required parameters
             function submitForm(submitType){
@@ -69,7 +77,7 @@
                     triggered = true;
                 }*/
                 
-                if (submitType == "add" && fname.value == ""){
+                if ((submitType == "add" || submitType == "remove") && fname.value == ""){
                     error += "\n\u2023 Full name";
                     triggered = true;
                 }
@@ -81,7 +89,12 @@
                 if (triggered) {
                     Swal.fire(error)
                 } else {
-                    document.getElementById('form').submit();
+                    if (submitType == "add"){
+                        form.action = '/submit/add/';
+                    } else {
+                        form.action = '/submit/remove/';
+                    }
+                    form.submit();
                 }
             }
         
@@ -97,6 +110,9 @@
                 window.location.href = 'login';
             }
 
+            function alert_close(){
+                document.getElementById('alert_box').style.display = 'none';
+            }
         </script>
     </body>
 </html>

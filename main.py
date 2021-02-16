@@ -101,28 +101,44 @@ def home():
 
 @app.route('/')
 def hometest():
-    result = firebase.get('users/restaurants', None)
+    result = firebase.get('/users', None)
     return str(result)
 
 
-@app.route('/submit', methods=['GET', 'POST'])
-def submit():
+@app.route('/submit/add/', endpoint='add', methods=["POST", "GET"])
+@app.route('/submit/remove/', endpoint='remove', methods=["POST", "GET"])
+def submitAdd():
     if request.method == 'POST':
-        userdata = dict(request.form)
-        name = userdata["fullname"]
-        password = userdata["password"]
-        #new_data = {"fullname": name, "password": password, "clock-in": null, "clock-out": null, "date": datetime.today(), "holiday": null}
-        new_data = {"fullname": name, "password": password}
-        firebase.post("/users", new_data)
-        #flash('User succesfully written to database!')
-        return render_template("profile.html")
+        if request.endpoint == 'add':
+            session.pop('_flashes', None)
+            userdata = dict(request.form)
+            name = userdata["fullname"]
+            password = userdata["password"]
+            new_data = {"fullname": name, "password": password, "clock-in": None, "clock-out": None, "date": datetime.today().strftime("%Y%m%d"), "holiday": None}
+            firebase.post("/users", new_data)
+            flash('Successfully added user to the database!')
+            return redirect(url_for('profile'))
+        else: 
+            session.pop('_flashes', None)
+            userdata = dict(request.form)
+            name = userdata["fullname"]
+            result = firebase.get('/users', None)
+            for key, value in result.items():
+                if value["fullname"] == name:
+                    try:
+                       firebase.delete("/users", key)
+                    except Exception as e:
+                        print("Issue removing user " + str(e))        
+            flash('Successfully removed user from database!')
+            return redirect(url_for('profile'))
     else:
         return "Sorry, there was an error."
+
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     if not g.user:
-        flash('Please to view your profile!')
+        flash('Please login to view your profile!')
         return redirect(url_for('login'))
     return render_template("profile.html")
 
