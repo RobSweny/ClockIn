@@ -23,6 +23,17 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+        <style>
+            table {
+                border: 0.5px solid black;
+            }
+
+            th, td {
+                padding: 12px;
+                border-bottom: 1px solid #ddd;
+            }
+        </style>
     </head>
     <body style="background-color:DarkSeaGreen; margin:12px;">
         <!--[if lt IE 7]>
@@ -65,12 +76,54 @@
                 {% endif %}
             {% endblock %}
             <button type="submit" onclick="userInfoContainer()" class="btn btn-primary" style="margin-top:10px;">View User Information</button>
+            
+            {% if g.user.admin %}
+            <div id="userTable" style=" display: none; margin: 10px; ">
+                <p>User Information</p>
+                <table>
+                    <tr>
+                        <th>fullname</th>
+                        <th>password</th> 
+                        <th>admin</th>
+                    </tr>
+                {% for row, value in result.items() %}
 
+                    <tr>
+                        <th>{{ value['fullname'] }}</th>
+                        <th>{{ value['password'] }}</th>
+                        <th>{{ value['admin'] }}</th>
+                    </tr>
+                {% endfor %}
+                </table>
+            </div>
+            {% endif %}
+
+            {% if not g.user.admin %}
+            <div id="userTable" style=" display: none; margin: 10px; ">
+                <p>User Information</p>
+                <table>
+                    <tr>
+                        <th>fullname</th>
+                        <th>password</th> 
+                        <th>admin</th>
+                    </tr>
+                {% for row, value in result.items() %}
+
+                    <tr>
+                        <th>{{ value['fullname'] }}</th>
+                        <th>{{ value['password'] }}</th>
+                        <th>{{ value['admin'] }}</th>
+                    </tr>
+                {% endfor %}
+                </table>
+            </div>
+            {% endif %}
         </div>
 
 
         <script type="text/javascript"> 
             var userManipContain = document.getElementById("userManipulationContainer");
+            var userTable = document.getElementById("userTable");
             //var userid = document.getElementById("userid");
             var fname = document.getElementById("fname");
             var pword = document.getElementById("pword");
@@ -123,10 +176,10 @@
             }
 
             function userInfoContainer(){
-                if(userManipContain.style.display == 'none'){
-                    userManipContain.style.display = 'block'    
+                if(userTable.style.display == 'none'){
+                    userTable.style.display = 'block'    
                 } else {
-                    userManipContain.style.display = 'none'    
+                    userTable.style.display = 'none'    
                 }
             }
 

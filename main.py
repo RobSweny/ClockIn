@@ -143,7 +143,22 @@ def profile():
     if not g.user:
         flash('Please login to view your profile!')
         return redirect(url_for('login'))
-    return render_template("profile.html")
+
+    result = firebase.get('/users', None)
+    triggered = False
+    # Retrieve all users
+    if not g.user.admin:
+        for key, value in result.items():
+            if value["fullname"] == g.user.username:
+                try:
+                    result = dict({'key': key, 'value': value})
+                    triggered = True
+                except Exception as e:
+                    print(str(e))
+    if not triggered:
+        result = {}
+    return render_template("profile.html", result=result)
+    
 
 
 # Retrieve all punchcards
