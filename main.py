@@ -38,7 +38,7 @@ class User:
 
     # Official string conversion of an object
     def __repr__(self):
-        return f'<User: {self.username}';
+        return f'User: {self.username}'
 
 users.append(User(id=1, username='Ana', password="password", admin=False))
 users.append(User(id=2, username='Rob', password="password", admin=True))
